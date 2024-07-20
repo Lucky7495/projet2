@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>En attente</title>
+  <style>
+    h1 {
+      text-align: center;
+    }
+    #leaderboard {
+      margin-top: 20px;
+    }
+    #current-cover {
+      width: 300px;
+    }
+  </style>
+</head>
+<body>
+<h1>En attente du prochain titre !</h1>
+
+<!-- Afficher le dernier gagnant -->
+
+<div id="lastWinner">
+  <h2>Dernier gagnant : <span id="winnerName"></span></h2>
+  <p>Temps : <span id="winnerTime"></span> secondes</p>
+</div>
+
+<h2 id="artist"></h2>
+<p id="title"></p>
+<!-- Div pour afficher la couverture de l'album -->
+<img id="current-cover" class="current-cover" alt="Cover de la musique en cours" />
+
+<!-- Afficher le classement -->
+<div id="leaderboard">
+  <h2>Classement : </h2>
+  <ul id="scoreList"></ul>
+</div>
+<div id="playlists"></div>
+<!-- Inclure Socket.IO -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const scoreList = document.getElementById('scoreList');
+  const winnerNameElement = document.getElementById('winnerName');
+  const winnerTimeElement = document.getElementById('winnerTime');
+  const titleElement = document.getElementById('title');
+  const artistElement = document.getElementById('artist');
+  const albumCoverElement = document.getElementById('current-cover');
+
+  const players = JSON.parse(localStorage.getItem('players')) || [];
+
+  console.log('Noms des joueurs:', players); // Ajoutez ce log pour vérifier les noms des joueurs
+
+  // Mettre à jour le classement
+  socket.on('updateScores', ({ scores, players }) => {
+    scoreList.innerHTML = '';
+    for (const [editor, score] of Object.entries(scores)) {
+      const editorIndex = parseInt(editor.replace('editor', '')) - 1;
+      if (players[editorIndex]) {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${players[editorIndex]}: ${score} point(s)`;
+        scoreList.appendChild(listItem);
+      }
+    }
+  });
+
+  async function fetchLastWinner() {
+    try {
+      const response = await fetch('/last-winner');
+      const lastWinner = await response.json();
+      console.log('Dernier gagnant:', lastWinner);  // Log pour vérifier les données
+      winnerNameElement.textContent = lastWinner.editor || 'Inconnu'; // Ajoutez un fallback pour le nom
+      winnerTimeElement.textContent = lastWinner.time; // Afficher le temps
+    } catch (error) {
+      console.error('Error fetching last winner info:', error);
+    }
+  }
+
+  async function fetchCurrentTrackInfo() {
+    try {
+      const response = await fetch('/current-track-info');
+      const currentTrackInfo = await response.json();
+
+      titleElement.textContent = `Titre : ${currentTrackInfo.title}`;
+      artistElement.textContent = `Artiste(s) : ${currentTrackInfo.artist}`;
+      albumCoverElement.src = currentTrackInfo.albumCover;
+    } catch (error) {
+      console.error('Error fetching current track info:', error);
+    }
+  }
+
+  // Fetch current track info and last winner info every 5 seconds
+  setInterval(() => {
+    fetchCurrentTrackInfo();
+    fetchLastWinner();
+  }, 5000);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchCurrentTrackInfo();
+    fetchLastWinner();
+  });
+
+  // Rediriger vers la page de l'éditeur quand un mot est sélectionné
+  socket.on('wordSelected', (words) => {
+    const editorNumber = localStorage.getItem('editorNumber');
+    if (words && editorNumber) {
+      window.location.href = `/editor${editorNumber}`;
+    }
+  });
+</script>
+</body>
+</html>

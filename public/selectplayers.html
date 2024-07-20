@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selection des Joueurs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+    }
+    .player-input {
+      margin-bottom: 10px;
+    }
+    button {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+<h1>Selection des Joueurs</h1>
+<div class="container">
+  <label for="numPlayers">Nombre de Joueurs:</label>
+  <input type="number" id="numPlayers" min="2" max="6" value="2">
+  <div id="playerNames">
+    <div class="player-input">
+      <label for="player1">Joueur 1:</label>
+      <input type="text" id="player1" placeholder="Nom du joueur 1">
+    </div>
+    <div class="player-input">
+      <label for="player2">Joueur 2:</label>
+      <input type="text" id="player2" placeholder="Nom du joueur 2">
+    </div>
+  </div>
+  <button id="startGame">Commencer le Jeu</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const numPlayersInput = document.getElementById('numPlayers');
+  const playerNamesDiv = document.getElementById('playerNames');
+  const startGameButton = document.getElementById('startGame');
+  const socket = io();
+
+  numPlayersInput.addEventListener('change', () => {
+    const numPlayers = numPlayersInput.value;
+    playerNamesDiv.innerHTML = '';
+    for (let i = 1; i <= numPlayers; i++) {
+      playerNamesDiv.innerHTML += `
+        <div class="player-input">
+          <label for="player${i}">Joueur ${i}:</label>
+          <input type="text" id="player${i}" placeholder="Nom du joueur ${i}">
+        </div>
+      `;
+    }
+  });
+
+  startGameButton.addEventListener('click', () => {
+    const numPlayers = numPlayersInput.value;
+    const players = [];
+    for (let i = 1; i <= numPlayers; i++) {
+      const playerName = document.getElementById(`player${i}`).value.trim();
+      if (playerName) {
+        players.push(playerName);
+      }
+    }
+    if (players.length === parseInt(numPlayers, 10)) {
+      localStorage.setItem('players', JSON.stringify(players));
+      socket.emit('setPlayers', players);
+      fetch('/set-players', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ players })
+      }).then(response => {
+        if (response.ok) {
+          window.location.href = '/master.html';
+        } else {
+          alert('Erreur lors de l\'enregistrement des joueurs sur le serveur.');
+        }
+      }).catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'enregistrement des joueurs sur le serveur.');
+      });
+    } else {
+      alert('Veuillez entrer les noms de tous les joueurs.');
+    }
+  });
+</script>
+</body>
+</html>

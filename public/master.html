@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<head>
+    <meta charset="UTF-8">
+    <title>Blindtest</title>
+    <style>
+        .playlist-image {
+            width: 200px;
+            height: 200px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        #current-track {
+            margin-top: 20px;
+        }
+        #current-track img {
+            width: 200px;
+            height: 200px;
+        }
+        #devices button {
+            display: block;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+<a href="selectPlayers.html">Configuration de la partie</a>
+<a href="/spotify-login">Connexion Spotify</a>
+
+<div id="lastWinner">
+    <h2>Dernier gagnant : <span id="winnerName"></span></h2>
+    <p>Temps : <span id="winnerTime"></span> secondes</p>
+</div>
+
+<!-- Afficher le classement -->
+<div id="leaderboard">
+    <h2>Classement :</h2>
+    <ul id="scoreList"></ul>
+</div>
+
+<div id="playlists"></div> <!-- Conteneur pour les playlists -->
+
+<!-- Bouton pour passer à la piste suivante -->
+<button id="nextTrackButton">Piste suivante</button>
+
+<!-- Bouton pour chercher à une minute -->
+<button id="seekButton">1 minute</button>
+
+<!-- Bouton pour pause/play -->
+<button id="playPauseButton"><i class="fa-solid fa-play"></i></button>
+
+<!-- Bouton pour resetWord -->
+<button id="resetWordButton">Reset Word</button>
+<div id="current-track">
+    <h2>Lecture en cours</h2>
+    <img id="track-cover" src="" alt="Album Cover">
+    <p id="track-title">Titre : </p>
+    <p id="track-artist">Artiste : </p>
+</div>
+
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="music.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const socket = io();
+        const scoreList = document.getElementById('scoreList');
+        const winnerNameElement = document.getElementById('winnerName');
+        const winnerTimeElement = document.getElementById('winnerTime');
+        const players = JSON.parse(localStorage.getItem('players')) || [];
+
+        // Mettre à jour le classement
+        socket.on('updateScores', ({ scores, players }) => {
+            scoreList.innerHTML = '';
+            for (const [editor, score] of Object.entries(scores)) {
+                const editorIndex = parseInt(editor.replace('editor', '')) - 1;
+                if (players[editorIndex]) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${players[editorIndex]}: ${score} point(s)`;
+                    scoreList.appendChild(listItem);
+                }
+            }
+        });
+
+        // Fonction pour récupérer et afficher le dernier gagnant
+        async function fetchLastWinner() {
+            try {
+                const response = await fetch('/last-winner');
+                const lastWinner = await response.json();
+                console.log('Dernier gagnant:', lastWinner);  // Log pour vérifier les données
+                winnerNameElement.textContent = lastWinner.editor || 'Inconnu'; // Ajoutez un fallback pour le nom
+                winnerTimeElement.textContent = parseFloat(lastWinner.time).toFixed(2); // Limite les secondes à 2 chiffres après la virgule
+            } catch (error) {
+                console.error('Error fetching last winner info:', error);
+            }
+        }
+
+        // Fetch current track info and last winner info every 5 seconds
+        setInterval(() => {
+            fetchLastWinner();
+        }, 5000);
+
+        // Fetch last winner info on initial load
+        fetchLastWinner();
+
+        // Gestionnaire d'événements pour le bouton resetWordButton
+        const resetWordButton = document.getElementById('resetWordButton');
+        resetWordButton.addEventListener('click', () => {
+            socket.emit('resetWord');
+            console.log('resetWord event emitted');
+        });
+
+        socket.on('chosenWordsStatus', (isChosenWordsEmpty) => {
+            if (isChosenWordsEmpty) {
+                document.getElementById('current-track').style.display = 'block';
+            } else {
+                document.getElementById('current-track').style.display = 'none';
+            }
+        });
+    });
+</script>
+</body>
+</html>

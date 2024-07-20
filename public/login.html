@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Choisissez votre éditeur</h1>
+<div class="container" id="editorButtons"></div>
+
+<script>
+  fetch('/get-players')
+          .then(response => response.json())
+          .then(players => {
+            const editorButtonsDiv = document.getElementById('editorButtons');
+            players.forEach((name, index) => {
+              const button = document.createElement('button');
+              button.classList.add('editor-button');
+              button.textContent = `Éditeur ${index + 1} (${name})`;
+              button.addEventListener('click', () => {
+                localStorage.setItem('editorNumber', index + 1);
+                window.location.href = `/editor${index + 1}.html`;
+              });
+              editorButtonsDiv.appendChild(button);
+            });
+          })
+          .catch(error => console.error('Erreur lors de la récupération des joueurs:', error));
+</script>
+</body>
+</html>
