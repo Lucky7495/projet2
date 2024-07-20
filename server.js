@@ -225,11 +225,10 @@ io.on('connection', (socket) => {
     socket.emit('currentTrackInfo', currentTrackInfo);
     socket.emit('lastWinner', lastWinner);
     socket.emit('chosenWordsStatus', chosenWords.length === 0); // Émettre l'état de chosenWords
-    socket.emit('wordSelected', chosenWords); // Envoyer chosenWords
 
-    // Envoyer resetWord une seule fois si chosenWords est vide
-    if (!chosenWords.length) {
-        socket.emit('resetWord');
+    // Envoyer chosenWords seulement s'il n'est pas vide
+    if (chosenWords.length > 0) {
+        socket.emit('wordSelected', chosenWords);
     }
 
     socket.on('updateArtistNames', (artistNames) => {
