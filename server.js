@@ -9,7 +9,11 @@ const SpotifyWebApi = require('spotify-web-api-node');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+    transports: ['websocket', 'polling'],
+    pingTimeout: 60000, // 60 secondes
+    pingInterval: 25000  // 25 secondes
+});
 
 const spotifyApi = new SpotifyWebApi({
     clientId: '2464c3b3b9c9452b9435682691b58831',
@@ -47,7 +51,7 @@ let chosenWords = [];
 let currentTrackInfo = {
     trackId: '',
     title: '',
-    artists: [],  // Changed from artist to artists
+    artists: [],
     albumCover: ''
 };
 
@@ -282,8 +286,8 @@ io.on('connection', (socket) => {
         io.emit('updateScores', { scores, players });
     });
 
-    socket.on('disconnect', () => {
-        console.log('Client déconnecté');
+    socket.on('disconnect', (reason) => {
+        console.log(`Client déconnecté: ${reason}`);
     });
 
     socket.on('resetWord', () => {
