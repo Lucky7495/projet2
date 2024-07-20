@@ -119,6 +119,7 @@ app.get('/editor5', (req, res) => {
 app.get('/editor6', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'editor6.html'));
 });
+
 app.post('/set-players', (req, res) => {
     const { players: newPlayers } = req.body;
     if (Array.isArray(newPlayers) && newPlayers.length > 0) {
@@ -133,6 +134,7 @@ app.post('/set-players', (req, res) => {
 app.get('/get-players', (req, res) => {
     res.json(players);
 });
+
 app.get('/spotify-login', (req, res) => {
     const scopes = [
         'user-read-private',
@@ -218,11 +220,12 @@ app.put('/transfer', (req, res) => {
 io.on('connection', (socket) => {
     console.log('Nouveau client connecté');
 
+    // Envoyer les états actuels lors de la connexion
     socket.emit('updateScores', { scores, players });
     socket.emit('currentTrackInfo', currentTrackInfo);
     socket.emit('lastWinner', lastWinner);
-    socket.emit('wordSelected', chosenWords); // Envoyer chosenWords
     socket.emit('chosenWordsStatus', chosenWords.length === 0); // Émettre l'état de chosenWords
+    socket.emit('wordSelected', chosenWords); // Envoyer chosenWords
 
     if (!chosenWords.length) {
         socket.emit('resetWord');
