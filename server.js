@@ -221,6 +221,7 @@ io.on('connection', (socket) => {
     socket.emit('updateScores', { scores, players });
     socket.emit('currentTrackInfo', currentTrackInfo);
     socket.emit('lastWinner', lastWinner);
+    io.emit('wordSelected', chosenWords);
     socket.emit('chosenWordsStatus', chosenWords.length === 0); // Émettre l'état de chosenWords
 
     if (!chosenWords.length) {
