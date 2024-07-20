@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 let accessToken = '';
-const selectedPlaylists = ['4spbC6SRE1KGSwUYWxhDTl', '37i9dQZEVXbKQ1ogMOyW9N'];
+const selectedPlaylists = ['4spbC6SRE1KGSwUYWxhDTl', '37i9dQZEVXbKQ1ogMOyW9N','3Q4cDI8NG1WdN4Crzv6tgF'];
 
 let editorData = {
     editor1: '',
