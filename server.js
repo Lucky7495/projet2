@@ -9,16 +9,12 @@ const SpotifyWebApi = require('spotify-web-api-node');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-    transports: ['websocket', 'polling'],
-    pingTimeout: 60000, // 60 secondes
-    pingInterval: 25000  // 25 secondes
-});
+const io = socketIo(server);
 
 const spotifyApi = new SpotifyWebApi({
     clientId: '2464c3b3b9c9452b9435682691b58831',
     clientSecret: 'e5160698201c4a07a83cf05c77ce15aa',
-    redirectUri: 'https://lucky.freeboxos.fr/callback'
+    redirectUri: 'https://lucky.freeboxos.fr/callback\n'
 });
 
 app.use(cors());
@@ -51,7 +47,7 @@ let chosenWords = [];
 let currentTrackInfo = {
     trackId: '',
     title: '',
-    artists: [],
+    artists: [],  // Changed from artist to artists
     albumCover: ''
 };
 
@@ -286,8 +282,8 @@ io.on('connection', (socket) => {
         io.emit('updateScores', { scores, players });
     });
 
-    socket.on('disconnect', (reason) => {
-        console.log(`Client déconnecté: ${reason}`);
+    socket.on('disconnect', () => {
+        console.log('Client déconnecté');
     });
 
     socket.on('resetWord', () => {
