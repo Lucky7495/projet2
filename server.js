@@ -12,8 +12,8 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const spotifyApi = new SpotifyWebApi({
-    clientId: '2464c3b3b9c9452b9435682691b58831',
-    clientSecret: 'e5160698201c4a07a83cf05c77ce15aa',
+    clientId: '',
+    clientSecret: '',
     redirectUri: 'https://lucky.freeboxos.fr/callback'
 });
 
