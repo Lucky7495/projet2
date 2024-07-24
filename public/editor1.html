@@ -220,58 +220,7 @@
     if (chosenWords.some(word => content.includes(word.toLowerCase()))) {
       socket.emit('wordFound', { editor: editorName, word: content });
     }
-
-  }  async function getMicrophonePermission() {
-    try {
-      const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
-      if (permissionStatus.state === 'granted') {
-        console.log('Microphone permission already granted');
-        localStorage.setItem('microphonePermission', 'granted');
-        startRecognition(); // Commencez la reconnaissance vocale
-      } else if (permissionStatus.state === 'prompt') {
-        console.log('Microphone permission prompt');
-        requestMicrophonePermission();
-      } else if (permissionStatus.state === 'denied') {
-        console.log('Microphone permission denied');
-        alert('Microphone permission denied. Please allow microphone access in your browser settings.');
-      }
-      permissionStatus.onchange = () => {
-        if (permissionStatus.state === 'granted') {
-          console.log('Microphone permission granted');
-          localStorage.setItem('microphonePermission', 'granted');
-          startRecognition(); // Commencez la reconnaissance vocale
-        } else {
-          localStorage.removeItem('microphonePermission');
-        }
-      };
-    } catch (error) {
-      console.error('Error checking microphone permission:', error);
-    }
   }
-
-  async function requestMicrophonePermission() {
-    try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      console.log('Microphone permission granted');
-      localStorage.setItem('microphonePermission', 'granted');
-      startRecognition(); // Commencez la reconnaissance vocale
-    } catch (error) {
-      console.error('Microphone permission denied:', error);
-    }
-  }
-
-  function startRecognition() {
-    // Commencez votre logique de reconnaissance vocale ici
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const micPermission = localStorage.getItem('microphonePermission');
-    if (micPermission === 'granted') {
-      startRecognition();
-    } else {
-      getMicrophonePermission();
-    }
-  });
 </script>
 </body>
 </html>

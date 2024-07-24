@@ -20,7 +20,6 @@
 <h1>En attente du prochain titre !</h1>
 
 <!-- Afficher le dernier gagnant -->
-
 <div id="lastWinner">
   <h2>Dernier gagnant : <span id="winnerName"></span></h2>
   <p>Temps : <span id="winnerTime"></span> secondes</p>
@@ -65,40 +64,22 @@
     }
   });
 
-  async function fetchLastWinner() {
-    try {
-      const response = await fetch('/last-winner');
-      const lastWinner = await response.json();
-      console.log('Dernier gagnant:', lastWinner);  // Log pour vérifier les données
-      winnerNameElement.textContent = lastWinner.editor || 'Inconnu'; // Ajoutez un fallback pour le nom
-      winnerTimeElement.textContent = lastWinner.time; // Afficher le temps
-    } catch (error) {
-      console.error('Error fetching last winner info:', error);
-    }
-  }
+  // Mettre à jour les informations du dernier gagnant
+  socket.on('lastWinner', (lastWinner) => {
+    winnerNameElement.textContent = lastWinner.editor || 'Inconnu';
+    winnerTimeElement.textContent = lastWinner.time;
+  });
 
-  async function fetchCurrentTrackInfo() {
-    try {
-      const response = await fetch('/current-track-info');
-      const currentTrackInfo = await response.json();
-
-      titleElement.textContent = `Titre : ${currentTrackInfo.title}`;
-      artistElement.textContent = `Artiste(s) : ${currentTrackInfo.artist}`;
-      albumCoverElement.src = currentTrackInfo.albumCover;
-    } catch (error) {
-      console.error('Error fetching current track info:', error);
-    }
-  }
-
-  // Fetch current track info and last winner info every 5 seconds
-  setInterval(() => {
-    fetchCurrentTrackInfo();
-    fetchLastWinner();
-  }, 5000);
+  // Mettre à jour les informations de la piste en cours
+  socket.on('currentTrackInfo', (currentTrackInfo) => {
+    titleElement.textContent = `Titre : ${currentTrackInfo.title}`;
+    artistElement.textContent = `Artiste(s) : ${currentTrackInfo.artists.join(', ')}`;
+    albumCoverElement.src = currentTrackInfo.albumCover;
+  });
 
   document.addEventListener('DOMContentLoaded', () => {
-    fetchCurrentTrackInfo();
-    fetchLastWinner();
+    socket.emit('requestCurrentTrackInfo');
+    socket.emit('requestLastWinner');
   });
 
   // Rediriger vers la page de l'éditeur quand un mot est sélectionné

@@ -301,6 +301,14 @@ io.on('connection', (socket) => {
         io.emit('lastWinner', lastWinner);
         io.emit('chosenWordsStatus', chosenWords.length === 0); // Met à jour l'état de chosenWords
     });
+
+    socket.on('requestCurrentTrackInfo', () => {
+        socket.emit('currentTrackInfo', currentTrackInfo);
+    });
+
+    socket.on('requestLastWinner', () => {
+        socket.emit('lastWinner', lastWinner);
+    });
 });
 
 const PORT = process.env.PORT || 8888;
