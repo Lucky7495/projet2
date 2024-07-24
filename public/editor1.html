@@ -196,6 +196,10 @@
     }
   }
 
+  function clearEditor() {
+    editorTextarea.value = '';
+  }
+
   socket.emit('joinRoom', editorName);
 
   socket.on('wordSelected', (words) => {
@@ -206,6 +210,10 @@
 
   socket.on('resetWord', () => {
     toggleView('waiting');
+  });
+
+  socket.on('clearEditors', () => {
+    clearEditor();
   });
 
   socket.on('updateScores', ({ scores, players }) => {
@@ -227,7 +235,7 @@
 
   socket.on('currentTrackInfo', (currentTrackInfo) => {
     titleElement.textContent = `Titre : ${currentTrackInfo.title}`;
-    artistElement.textContent = `Artiste(s) : ${currentTrackInfo.artists.join(', ')}`;
+    artistElement.textContent = `Artiste : ${currentTrackInfo.artist}`;
     albumCoverElement.src = currentTrackInfo.albumCover;
   });
 
