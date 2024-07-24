@@ -17,6 +17,7 @@ const spotifyApi = new SpotifyWebApi({
     redirectUri: 'https://lucky.freeboxos.fr/callback'
 });
 
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
