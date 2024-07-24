@@ -299,14 +299,14 @@
 
   // Afficher la section waiting au lieu de rediriger
   socket.on('resetWord', () => {
-    editor.style.display = 'none';
+    editor.parentElement.style.display = 'none';
     waitingSection.style.display = 'block';
   });
 
   // Afficher la section editor lorsque le mot est trouvé
   socket.on('wordFound', () => {
     waitingSection.style.display = 'none';
-    editor.style.display = 'block';
+    editor.parentElement.style.display = 'block';
   });
 
   // Vérifier si le mot écrit dans l'éditeur fait partie du tableau

@@ -84,9 +84,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-app.get('/waiting', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'waiting.html'));
-});
+// Supprimer la route /waiting
+// app.get('/waiting', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'public', 'waiting.html'));
+// });
 
 app.get('/master', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'master.html'));
