@@ -12,8 +12,8 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const spotifyApi = new SpotifyWebApi({
-    clientId: '2464c3b3b9c9452b9435682691b58831',
-    clientSecret: 'e5160698201c4a07a83cf05c77ce15aa',
+    clientId: '',
+    clientSecret: '',
     redirectUri: 'https://lucky.freeboxos.fr/callback'
 });
 
@@ -47,7 +47,7 @@ let chosenWords = [];
 let currentTrackInfo = {
     trackId: '',
     title: '',
-    artists: [],  // Changed from artist to artists
+    artists: [],
     albumCover: ''
 };
 
@@ -66,13 +66,13 @@ app.get('/current-track-info', (req, res) => {
 app.post('/current-track-info', (req, res) => {
     const { trackId, title, artist, albumCover } = req.body;
     currentTrackInfo = { trackId, title, artist, albumCover };
-    startTime = Date.now();  // Initialiser startTime ici
-    console.log(`startTime initialized: ${startTime}`); // Log for debugging
+    startTime = Date.now();
+    console.log(`startTime initialized: ${startTime}`);
 
     console.log('Received current track info:', currentTrackInfo);
-    console.log('Updated chosen words:', chosenWords); // Log for debugging
+    console.log('Updated chosen words:', chosenWords);
     io.emit('wordSelected', chosenWords);
-    io.emit('chosenWordsStatus', chosenWords.length === 0); // Met à jour l'état de chosenWords
+    io.emit('chosenWordsStatus', chosenWords.length === 0);
     res.status(200).send('Current track info updated');
 });
 
@@ -81,43 +81,7 @@ app.get('/last-winner', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-app.get('/waiting', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'waiting.html'));
-});
-
-app.get('/master', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'master.html'));
-});
-
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-app.get('/editor1', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'editor1.html'));
-});
-
-app.get('/editor2', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'editor2.html'));
-});
-
-app.get('/editor3', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'editor3.html'));
-});
-
-app.get('/editor4', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'editor4.html'));
-});
-
-app.get('/editor5', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'editor5.html'));
-});
-
-app.get('/editor6', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'editor6.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.post('/set-players', (req, res) => {
@@ -220,13 +184,11 @@ app.put('/transfer', (req, res) => {
 io.on('connection', (socket) => {
     console.log('Nouveau client connecté');
 
-    // Envoyer les états actuels lors de la connexion
     socket.emit('updateScores', { scores, players });
     socket.emit('currentTrackInfo', currentTrackInfo);
     socket.emit('lastWinner', lastWinner);
-    socket.emit('chosenWordsStatus', chosenWords.length === 0); // Émettre l'état de chosenWords
+    socket.emit('chosenWordsStatus', chosenWords.length === 0);
 
-    // Envoyer chosenWords seulement s'il n'est pas vide
     if (chosenWords.length > 0) {
         socket.emit('wordSelected', chosenWords);
     }
@@ -234,7 +196,7 @@ io.on('connection', (socket) => {
     socket.on('updateArtistNames', (artistNames) => {
         chosenWords = Array.isArray(artistNames) ? artistNames : [artistNames];
         console.log('Updated chosen words:', chosenWords);
-        io.emit('chosenWordsStatus', chosenWords.length === 0); // Met à jour l'état de chosenWords
+        io.emit('chosenWordsStatus', chosenWords.length === 0);
     });
 
     socket.on('requestWord', () => {
@@ -250,7 +212,7 @@ io.on('connection', (socket) => {
 
     socket.on('wordFound', (data) => {
         const { editor, word } = data;
-        console.log(`wordFound received: editor=${editor}, word=${word}`); // Log for debugging
+        console.log(`wordFound received: editor=${editor}, word=${word}`);
         if (chosenWords.some(chosenWord => word.includes(chosenWord.toLowerCase()))) {
             scores[editor] = (scores[editor] || 0) + 1;
             console.log(`Editor ${editor} found a word! Score: ${scores[editor]}`);
@@ -260,14 +222,14 @@ io.on('connection', (socket) => {
             io.emit('clearEditors');
             io.emit('resetWord');
             io.emit('redirectToWaiting');
-            io.emit('chosenWordsStatus', chosenWords.length === 0); // Met à jour l'état de chosenWords
+            io.emit('chosenWordsStatus', chosenWords.length === 0);
 
             const endTime = Date.now();
             if (startTime === null) {
                 console.error('startTime is not initialized');
             } else {
-                const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); // Calculate elapsed time in seconds
-                console.log(`endTime: ${endTime}, startTime: ${startTime}, elapsedTime: ${elapsedTime}`); // Log for debugging
+                const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+                console.log(`endTime: ${endTime}, startTime: ${startTime}, elapsedTime: ${elapsedTime}`);
 
                 lastWinner = {
                     editor: players[parseInt(editor.replace('editor', ''), 10) - 1] || editor,
@@ -276,7 +238,7 @@ io.on('connection', (socket) => {
                 io.emit('lastWinner', lastWinner);
             }
 
-            startTime = null; // Reset startTime for the next track
+            startTime = null;
         }
     });
 
@@ -299,7 +261,7 @@ io.on('connection', (socket) => {
         };
         io.emit('resetWord');
         io.emit('lastWinner', lastWinner);
-        io.emit('chosenWordsStatus', chosenWords.length === 0); // Met à jour l'état de chosenWords
+        io.emit('chosenWordsStatus', chosenWords.length === 0);
     });
 
     socket.on('requestCurrentTrackInfo', () => {
