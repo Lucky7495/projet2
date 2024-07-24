@@ -217,6 +217,7 @@ app.put('/transfer', (req, res) => {
         });
 });
 
+// Adapter les événements Socket.io pour l'affichage de la section "waiting"
 io.on('connection', (socket) => {
     console.log('Nouveau client connecté');
 
@@ -258,8 +259,7 @@ io.on('connection', (socket) => {
             chosenWords = [];
             io.emit('updateScores', { scores, players });
             io.emit('clearEditors');
-            io.emit('resetWord');
-            io.emit('redirectToWaiting');
+            io.emit('resetWord'); // Mise à jour de l'événement pour afficher la section waiting
             io.emit('chosenWordsStatus', chosenWords.length === 0); // Met à jour l'état de chosenWords
 
             const endTime = Date.now();
@@ -297,11 +297,12 @@ io.on('connection', (socket) => {
             editor: '',
             time: 0
         };
-        io.emit('resetWord');
+        io.emit('resetWord'); // Mise à jour de l'événement pour afficher la section waiting
         io.emit('lastWinner', lastWinner);
         io.emit('chosenWordsStatus', chosenWords.length === 0); // Met à jour l'état de chosenWords
     });
 });
+
 
 const PORT = process.env.PORT || 8888;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
