@@ -235,9 +235,22 @@
   });
 
   document.addEventListener('DOMContentLoaded', () => {
-    socket.emit('requestCurrentTrackInfo');
+    fetchCurrentTrackInfo();
     socket.emit('requestLastWinner');
   });
+
+  function fetchCurrentTrackInfo() {
+    fetch('/current-track-info')
+            .then(response => response.json())
+            .then(data => {
+              titleElement.textContent = `Titre : ${data.title}`;
+              artistElement.textContent = `Artiste(s) : ${data.artists.join(', ')}`;
+              albumCoverElement.src = data.albumCover;
+            })
+            .catch(error => {
+              console.error('Error fetching current track info:', error);
+            });
+  }
 
   function toggleView(view) {
     if (view === 'editor') {
