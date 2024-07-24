@@ -220,6 +220,7 @@
     if (chosenWords.some(word => content.includes(word.toLowerCase()))) {
       socket.emit('wordFound', { editor: editorName, word: content });
     }
+
   }  async function getMicrophonePermission() {
     try {
       const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
