@@ -75,7 +75,29 @@ app.post('/current-track-info', (req, res) => {
     io.emit('chosenWordsStatus', chosenWords.length === 0);
     res.status(200).send('Current track info updated');
 });
+app.get('/editor1', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'editor1.html'));
+});
 
+app.get('/editor2', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'editor2.html'));
+});
+
+app.get('/editor3', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'editor3.html'));
+});
+
+app.get('/editor4', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'editor4.html'));
+});
+
+app.get('/editor5', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'editor5.html'));
+});
+
+app.get('/editor6', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'editor6.html'));
+});
 app.get('/last-winner', (req, res) => {
     res.json(lastWinner);
 });
