@@ -135,7 +135,7 @@
 
 <main class="container">
   <h1>Éditeur</h1>
-  <div class="editor">
+  <div class="editor" id="editorSection">
     <button id="startButton" class="progress-button"><i class="fa-solid fa-microphone"></i></button>
     <textarea id="editor" rows="10" cols="50"></textarea>
     <ul id="chosenWordsList"></ul>
@@ -169,6 +169,7 @@
   const startButton = document.getElementById('startButton');
   const chosenWordsList = document.getElementById('chosenWordsList');
   const waitingSection = document.getElementById('waitingSection');
+  const editorSection = document.getElementById('editorSection');
   const scoreList = document.getElementById('scoreList');
   const winnerNameElement = document.getElementById('winnerName');
   const winnerTimeElement = document.getElementById('winnerTime');
@@ -289,6 +290,8 @@
   socket.on('wordSelected', (words) => {
     chosenWords = words;
     console.log(`Mots choisis: ${words}`);
+    waitingSection.style.display = 'none';
+    editorSection.style.display = 'block';
   });
 
   // Envoyer les mises à jour de l'éditeur au serveur
@@ -299,14 +302,14 @@
 
   // Afficher la section waiting au lieu de rediriger
   socket.on('resetWord', () => {
-    editor.parentElement.style.display = 'none';
+    editorSection.style.display = 'none';
     waitingSection.style.display = 'block';
   });
 
   // Afficher la section editor lorsque le mot est trouvé
   socket.on('wordFound', () => {
     waitingSection.style.display = 'none';
-    editor.parentElement.style.display = 'block';
+    editorSection.style.display = 'block';
   });
 
   // Vérifier si le mot écrit dans l'éditeur fait partie du tableau
