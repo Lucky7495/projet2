@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Application</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <title>Éditeur</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,8 +24,9 @@
       justify-content: center;
       height: 100vh;
     }
+
     main.container {
-      background-color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255, 255, 255, 0.8); /* Opacité réduite */
       padding: 20px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
@@ -30,14 +34,13 @@
       max-width: 500px;
       text-align: center;
     }
-    #editor, #waiting {
-      display: none;
-    }
+
     h1 {
-      color: #000;
+      color: #000; /* Couleur changée pour une meilleure lisibilité */
       margin-bottom: 20px;
     }
-    #editor textarea {
+
+    #editor {
       width: 100%;
       height: 150px;
       box-sizing: border-box;
@@ -47,9 +50,18 @@
       padding: 10px;
       font-size: 16px;
       color: #fff;
-      background-color: rgba(0, 0, 0, 0.6);
+      background-color: rgba(0, 0, 0, 0.6); /* Opacité réduite */
       resize: none;
     }
+
+    #chosenWordsList {
+      font-weight: bold;
+      list-style-type: none;
+      padding: 0;
+      margin: 20px 0 0;
+      text-align: left;
+    }
+
     .progress-button {
       position: relative;
       width: 80px;
@@ -67,6 +79,7 @@
       margin-left: auto;
       margin-right: auto;
     }
+
     .progress-button::before {
       content: '';
       position: absolute;
@@ -78,74 +91,66 @@
       z-index: 0;
       transition: height 0s, top 0s;
     }
+
     .progress-button.active::before {
       height: 0%;
       top: 100%;
       transition: height 10s linear, top 10s linear;
     }
+
     .progress-button i {
       position: relative;
       z-index: 1;
       color: #fff;
     }
-    #current-cover {
-      width: 300px;
+
+    @media (max-width: 768px) {
+      body {
+        background-position: left;
+      }
+
+      main.container {
+        background-color: rgba(255, 255, 255, 0.7);
+        box-shadow: none;
+      }
+
+      h1 {
+        color: #000; /* Couleur changée pour une meilleure lisibilité */
+      }
     }
   </style>
 </head>
 <body>
+
 <main class="container">
-  <div id="editor">
-    <h1>Éditeur</h1>
-    <div class="editor">
-      <button id="startButton" class="progress-button"><i class="fa-solid fa-microphone"></i></button>
-      <textarea id="editorTextarea" rows="10" cols="50"></textarea>
-      <ul id="chosenWordsList"></ul>
-    </div>
-  </div>
-  <div id="waiting">
-    <h1>En attente du prochain titre !</h1>
-    <div id="lastWinner">
-      <h2>Dernier gagnant : <span id="winnerName"></span></h2>
-      <p>Temps : <span id="winnerTime"></span> secondes</p>
-    </div>
-    <h2 id="artist"></h2>
-    <p id="title"></p>
-    <img id="current-cover" class="current-cover" alt="Cover de la musique en cours" />
-    <div id="leaderboard">
-      <h2>Classement : </h2>
-      <ul id="scoreList"></ul>
-    </div>
-    <div id="playlists"></div>
+  <h1>Éditeur</h1>
+  <div class="editor">
+    <button id="startButton" class="progress-button"><i class="fa-solid fa-microphone"></i></button>
+    <textarea id="editor" rows="10" cols="50"></textarea>
+    <ul id="chosenWordsList"></ul>
   </div>
 </main>
 
-<!-- Inclure Socket.IO -->
+<!-- Inclure Socket.io -->
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
-  const scoreList = document.getElementById('scoreList');
-  const winnerNameElement = document.getElementById('winnerName');
-  const winnerTimeElement = document.getElementById('winnerTime');
-  const titleElement = document.getElementById('title');
-  const artistElement = document.getElementById('artist');
-  const albumCoverElement = document.getElementById('current-cover');
-  const editor = document.getElementById('editor');
-  const waiting = document.getElementById('waiting');
-  const editorTextarea = document.getElementById('editorTextarea');
-  const startButton = document.getElementById('startButton');
-  const chosenWordsList = document.getElementById('chosenWordsList');
 
   const editorName = 'editor1'; // Remplacer par le nom de l'éditeur correspondant
 
+  // Reconnaissance vocale
+  const editor = document.getElementById('editor');
+  const startButton = document.getElementById('startButton');
+  const chosenWordsList = document.getElementById('chosenWordsList');
+
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = new SpeechRecognition();
-  recognition.lang = 'fr-FR';
-  recognition.interimResults = true;
+  recognition.lang = 'fr-FR'; // Langue française
+  recognition.interimResults = true; // Activer les résultats intermédiaires pour une meilleure réactivité
 
   let isRecognizing = false;
   let recognitionTimeout = null;
-  let chosenWords = [];
+  let chosenWords = []; // Stocker les mots choisis
 
   startButton.addEventListener('click', () => {
     if (isRecognizing) {
@@ -154,7 +159,7 @@
       isRecognizing = false;
       startButton.classList.remove('active');
     } else {
-      editorTextarea.value = '';
+      editor.value = '';
       recognition.start();
       isRecognizing = true;
       startButton.classList.add('active');
@@ -162,7 +167,7 @@
         recognition.stop();
         isRecognizing = false;
         startButton.classList.remove('active');
-      }, 10000);
+      }, 10000); // Arrêter la reconnaissance après 10 secondes
     }
   });
 
@@ -179,8 +184,8 @@
       }
     }
 
-    editorTextarea.value = finalTranscript + interimTranscript;
-    const content = editorTextarea.value.toLowerCase();
+    editor.value = finalTranscript + interimTranscript;
+    const content = editor.value.toLowerCase(); // Convertir tout le contenu en minuscules
     checkWord(content);
   };
 
@@ -190,72 +195,32 @@
     }
   };
 
+  // Rejoindre la chambre (room) correspondant à l'éditeur
+  socket.emit('joinRoom', editorName);
+
+  // Écouter l'événement de sélection du mot
+  socket.on('wordSelected', (words) => {
+    chosenWords = words;
+    console.log(`Mots choisis: ${words}`);
+  });
+
+  // Envoyer les mises à jour de l'éditeur au serveur
+  editor.addEventListener('input', () => {
+    const content = editor.value.toLowerCase(); // Convertir le contenu en minuscules
+    checkWord(content);
+  });
+
+  // Rediriger vers la page d'attente si le mot choisi est vide
+  socket.on('resetWord', () => {
+    window.location.href = '/waiting';
+  });
+
+  // Vérifier si le mot écrit dans l'éditeur fait partie du tableau
   function checkWord(content) {
     if (chosenWords.some(word => content.includes(word.toLowerCase()))) {
       socket.emit('wordFound', { editor: editorName, word: content });
     }
   }
-
-  function clearEditor() {
-    editorTextarea.value = '';
-  }
-
-  socket.emit('joinRoom', editorName);
-
-  socket.on('wordSelected', (words) => {
-    chosenWords = words;
-    console.log(`Mots choisis: ${words}`);
-    toggleView('editor');
-  });
-
-  socket.on('resetWord', () => {
-    toggleView('waiting');
-  });
-
-  socket.on('clearEditors', () => {
-    clearEditor();
-  });
-
-  socket.on('updateScores', ({ scores, players }) => {
-    scoreList.innerHTML = '';
-    for (const [editor, score] of Object.entries(scores)) {
-      const editorIndex = parseInt(editor.replace('editor', '')) - 1;
-      if (players[editorIndex]) {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${players[editorIndex]}: ${score} point(s)`;
-        scoreList.appendChild(listItem);
-      }
-    }
-  });
-
-  socket.on('lastWinner', (lastWinner) => {
-    winnerNameElement.textContent = lastWinner.editor || 'Inconnu';
-    winnerTimeElement.textContent = lastWinner.time;
-  });
-
-  socket.on('currentTrackInfo', (currentTrackInfo) => {
-    titleElement.textContent = `Titre : ${currentTrackInfo.title}`;
-    artistElement.textContent = `Artiste : ${currentTrackInfo.artist}`;
-    albumCoverElement.src = currentTrackInfo.albumCover;
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    socket.emit('requestCurrentTrackInfo');
-    socket.emit('requestLastWinner');
-  });
-
-  function toggleView(view) {
-    if (view === 'editor') {
-      editor.style.display = 'block';
-      waiting.style.display = 'none';
-    } else if (view === 'waiting') {
-      editor.style.display = 'none';
-      waiting.style.display = 'block';
-    }
-  }
-
-  // Initial view is waiting
-  toggleView('waiting');
 </script>
 </body>
 </html>
