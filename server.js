@@ -118,7 +118,7 @@ app.get('/callback', (req, res) => {
         const refreshToken = data.body['refresh_token'];
         spotifyApi.setAccessToken(accessToken);
         spotifyApi.setRefreshToken(refreshToken);
-        res.redirect('/master');
+        res.redirect('/master.html');
     }).catch(err => {
         console.error('Error getting Tokens:', err);
         res.redirect('/');
